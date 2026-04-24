@@ -1,39 +1,57 @@
+import hydra
+from omegaconf import DictConfig, OmegaConf
+import pandas as pd
+import os
+
 from src.training.process_data import process_data
 from src.training.train import train_models
 from src.training.evaluate import evaluate
 
-import pandas as pd
-import os
 
 
-def main(logger):
+@hydra.main(
+    version_base=None,
+    config_path="conf",
+    config_name="config"
+)
+def main(cfg: DictConfig):
+    
+    print("FULL CONFIG:")
+    print(OmegaConf.to_yaml(cfg))
+
+    from src.logger import ExecutorLogger
+    logger = ExecutorLogger("titanic_pipeline")
 
     logger.info("Pipeline started")
 
-    # Step 1: process data
-    process_data("train", "Survived", logger)
+    process_data(cfg, logger)
 
-    # Step 2: load processed data
-    train_df = pd.read_parquet("data/processed/train-train.parquet")
-    test_df = pd.read_parquet("data/processed/train-test.parquet")
+    train_df = pd.read_parquet(
+        os.path.join(
+            cfg.pipeline.data.processed_path,
+            f"{cfg.pipeline.data.file_name}-train.parquet"
+        )
+    )
 
-    X_train = train_df.drop("Survived", axis=1)
-    y_train = train_df["Survived"]
+    test_df = pd.read_parquet(
+        os.path.join(
+            cfg.pipeline.data.processed_path,
+            f"{cfg.pipeline.data.file_name}-test.parquet"
+        )
+    )
 
-    X_test = test_df.drop("Survived", axis=1)
-    y_test = test_df["Survived"]
+    X_train = train_df.drop(cfg.pipeline.data.target_column, axis=1)
+    y_train = train_df[cfg.pipeline.data.target_column]
 
-    # Step 3: train
-    model = train_models(X_train, y_train, logger)
+    X_test = test_df.drop(cfg.pipeline.data.target_column, axis=1)
+    y_test = test_df[cfg.pipeline.data.target_column]
 
-    # Step 4: evaluate
-    evaluate(X_test, y_test, logger)
+    train_models(X_train, y_train, logger, cfg)
+
+    evaluate(X_test, y_test, logger, cfg)
 
     logger.info("Pipeline finished")
 
 
 if __name__ == "__main__":
-    from src.logger import ExecutorLogger
-
-    logger = ExecutorLogger("titanic_pipeline")
-    main(logger)
+    main()

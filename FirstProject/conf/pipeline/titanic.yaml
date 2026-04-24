@@ -1,0 +1,21 @@
+data:
+  raw_path: data/raw
+  processed_path: data/processed
+  file_name: train
+  target_column: Survived
+
+split:
+  test_size: 0.2
+  random_state: 42
+
+model:
+  logistic:
+    max_iter: 200
+
+  random_forest:
+    random_state: 42
+    n_estimators: 100
+
+output:
+  model_path: models/best_model.pkl
+  metrics_path: reports/metrics.json

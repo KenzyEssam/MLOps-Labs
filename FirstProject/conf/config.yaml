@@ -1,0 +1,3 @@
+defaults:
+  - pipeline: titanic2
+  - _self_
