@@ -1,0 +1,5 @@
+[core]
+    remote = origin
+['remote "origin"']
+    url = s3://MLOps-Labs
+    endpointurl = https://dagshub.com/api/v1/repo-buckets/s3/kenzy.3ab7alim
