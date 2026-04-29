@@ -1,0 +1,36 @@
+stages:
+
+  process_data:
+    cmd: python trainer.py +pipeline.run_stage=process_data
+    deps:
+      - trainer.py
+      - src/training/process_data.py
+      - conf/config.yaml
+      - data/raw/train.csv
+    outs:
+      - data/processed/train-train.parquet
+      - data/processed/train-test.parquet
+
+
+  train:
+    cmd: python trainer.py +pipeline.run_stage=train
+    deps:
+      - trainer.py
+      - src/training/train.py
+      - src/training/process_data.py
+      - conf/config.yaml
+      - data/processed/train-train.parquet
+    outs:
+      - models/best_model.pkl
+
+
+  evaluate:
+    cmd: python trainer.py +pipeline.run_stage=evaluate
+    deps:
+      - trainer.py
+      - src/training/evaluate.py
+      - conf/config.yaml
+      - models/best_model.pkl
+      - data/processed/train-test.parquet
+    outs:
+      - reports/metrics.json

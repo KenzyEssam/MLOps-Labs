@@ -1,0 +1,19 @@
+pipeline:
+  data:
+    raw_path: data/raw
+    processed_path: data/processed
+    file_name: train
+    target_column: Survived
+  split:
+    test_size: 0.3
+    random_state: 10
+  model:
+    logistic:
+      max_iter: 500
+    random_forest:
+      random_state: 10
+      n_estimators: 200
+  output:
+    model_path: models/best_model2.pkl
+    metrics_path: reports/metrics2.json
+  run_stage: process_data
