@@ -6,6 +6,7 @@ stages:
       - trainer.py
       - src/training/process_data.py
       - conf/config.yaml
+      - conf/pipeline/titanic.yaml
       - data/raw/train.csv
     outs:
       - data/processed/train-train.parquet
@@ -19,6 +20,7 @@ stages:
       - src/training/train.py
       - src/training/process_data.py
       - conf/config.yaml
+      - conf/pipeline/titanic.yaml
       - data/processed/train-train.parquet
     outs:
       - models/best_model.pkl
@@ -30,6 +32,7 @@ stages:
       - trainer.py
       - src/training/evaluate.py
       - conf/config.yaml
+      - conf/pipeline/titanic.yaml
       - models/best_model.pkl
       - data/processed/train-test.parquet
     outs:

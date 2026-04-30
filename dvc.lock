@@ -7,6 +7,10 @@ stages:
       hash: md5
       md5: d2fd7ec40306b65dc9fdc098c393427c
       size: 44
+    - path: conf/pipeline/titanic.yaml
+      hash: md5
+      md5: 39e12c228104a3e3be51e800870650af
+      size: 347
     - path: data/raw/train.csv
       hash: md5
       md5: 2309cc5f04782ed9bb6016d9f4e381cf
@@ -35,6 +39,10 @@ stages:
       hash: md5
       md5: d2fd7ec40306b65dc9fdc098c393427c
       size: 44
+    - path: conf/pipeline/titanic.yaml
+      hash: md5
+      md5: 759ba63816dcbc40c0a6b5c9f82d21d4
+      size: 347
     - path: data/processed/train-train.parquet
       hash: md5
       md5: aa11ca9e71e3bb3620e0288214b6a3fb
@@ -63,6 +71,10 @@ stages:
       hash: md5
       md5: d2fd7ec40306b65dc9fdc098c393427c
       size: 44
+    - path: conf/pipeline/titanic.yaml
+      hash: md5
+      md5: 759ba63816dcbc40c0a6b5c9f82d21d4
+      size: 347
     - path: data/processed/train-test.parquet
       hash: md5
       md5: dcea0a6e3af4c9841c5774b6cfa49bf7
