@@ -1,101 +1,71 @@
 schema: '2.0'
 stages:
   process_data:
-    cmd: python trainer.py +pipeline.run_stage=process_data
+    cmd: python src\training\process_data.py
     deps:
-    - path: conf/config.yaml
-      hash: md5
-      md5: d2fd7ec40306b65dc9fdc098c393427c
-      size: 44
-    - path: conf/pipeline/titanic.yaml
-      hash: md5
-      md5: f6548f41fe222746123d8be44007fd2b
-      size: 345
     - path: data/raw/train.csv
       hash: md5
       md5: 2309cc5f04782ed9bb6016d9f4e381cf
       size: 61194
-    - path: src/training/process_data.py
-      hash: md5
-      md5: 9eb9c915b86ec92e7e112c3b53dce896
-      size: 2024
-    - path: trainer.py
-      hash: md5
-      md5: ec1afb7ef2f9c8edee88f895d3c3c177
-      size: 3201
+    params:
+      params.yaml:
+        data:
+          raw_path: data/raw
+          processed_path: data/processed
+          file_name: train
+          target_column: Survived
+          test_path: data/processed/train-test.parquet
+        split:
+          test_size: 0.3
+          random_state: 12
     outs:
     - path: data/processed/train-test.parquet
       hash: md5
-      md5: dcea0a6e3af4c9841c5774b6cfa49bf7
-      size: 8202
+      md5: c607e7aaf1f52560243547803a42af3c
+      size: 9206
     - path: data/processed/train-train.parquet
       hash: md5
-      md5: aa11ca9e71e3bb3620e0288214b6a3fb
-      size: 13662
+      md5: 5cef8bcf6c09f26cf89a2d4afd7b1e97
+      size: 12800
   train:
-    cmd: python trainer.py +pipeline.run_stage=train
+    cmd: python src\training\train.py
     deps:
-    - path: conf/config.yaml
-      hash: md5
-      md5: d2fd7ec40306b65dc9fdc098c393427c
-      size: 44
-    - path: conf/pipeline/titanic.yaml
-      hash: md5
-      md5: f6548f41fe222746123d8be44007fd2b
-      size: 345
-    - path: data/processed/train-train.parquet
-      hash: md5
-      md5: aa11ca9e71e3bb3620e0288214b6a3fb
-      size: 13662
-    - path: src/training/process_data.py
-      hash: md5
-      md5: 9eb9c915b86ec92e7e112c3b53dce896
-      size: 2024
-    - path: src/training/train.py
-      hash: md5
-      md5: 710dbea2df5defe9bd015f269686afbc
-      size: 1656
-    - path: trainer.py
-      hash: md5
-      md5: ec1afb7ef2f9c8edee88f895d3c3c177
-      size: 3201
-    outs:
-    - path: models/best_model.pkl
-      hash: md5
-      md5: 85c297565923a035d1ade833e1d8a44c
-      size: 179696
-  evaluate:
-    cmd: python trainer.py +pipeline.run_stage=evaluate
-    deps:
-    - path: conf/config.yaml
-      hash: md5
-      md5: d2fd7ec40306b65dc9fdc098c393427c
-      size: 44
-    - path: conf/pipeline/titanic.yaml
-      hash: md5
-      md5: f6548f41fe222746123d8be44007fd2b
-      size: 345
     - path: data/processed/train-test.parquet
       hash: md5
-      md5: dcea0a6e3af4c9841c5774b6cfa49bf7
-      size: 8202
-    - path: models/best_model.pkl
+      md5: c607e7aaf1f52560243547803a42af3c
+      size: 9206
+    params:
+      params.yaml:
+        experiment:
+          name: my-titanic-experiments
+          DAGSHUB_USERNAME: kenzy.3ab7alim
+          DAGSHUB_REPO: MLOps-Labs
+        model:
+          logistic:
+            max_iter: 54
+            C: 0.4
+          random_forest:
+            random_state: 42
+            n_estimators: 14
+            max_depth: 8
+            min_samples_split: 6
+            min_samples_leaf: 8
+  evaluate:
+    cmd: python src\training\evaluate.py
+    deps:
+    - path: data/processed/train-test.parquet
       hash: md5
-      md5: 85c297565923a035d1ade833e1d8a44c
-      size: 179696
-    - path: src/training/evaluate.py
-      hash: md5
-      md5: 506b5f92915137c416e3f372b39339a0
-      size: 642
-    - path: trainer.py
-      hash: md5
-      md5: ec1afb7ef2f9c8edee88f895d3c3c177
-      size: 3201
+      md5: c607e7aaf1f52560243547803a42af3c
+      size: 9206
+    params:
+      params.yaml:
+        output.metrics_path: reports/metrics.json
+        output.model_path: models/best_model.pkl
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: aa534d239d9407012611c8bc5f1c06b8
-      size: 112
+      md5: a4f58e121e5e6492903df2c4314e25c1
+      size: 113
   process_data_1:
     cmd: python src\training\process_data.py titanic
     deps:
@@ -111,52 +81,52 @@ stages:
           file_name: train
           target_column: Survived
         titanic.split:
-          test_size: 0.7
+          test_size: 0.3
           random_state: 48
     outs:
     - path: data/processed/train-test.parquet
       hash: md5
-      md5: eab5fe4a13efefc1e6194575d54b9465
-      size: 12815
+      md5: 1df9b3e552c2613e5f18f807ccc3e14d
+      size: 9149
     - path: data/processed/train-train.parquet
       hash: md5
-      md5: af65db9d61654faefa4d037ef9ad4cf1
-      size: 9249
+      md5: 55627af2cd6dcb0d9e529aea5e3e4216
+      size: 12851
   train_1:
     cmd: python src\training\train.py titanic
     deps:
     - path: data/processed/train-test.parquet
       hash: md5
-      md5: eab5fe4a13efefc1e6194575d54b9465
-      size: 12815
+      md5: 1df9b3e552c2613e5f18f807ccc3e14d
+      size: 9149
     params:
       params.yaml:
         titanic.model:
           logistic:
-            max_iter: 81
-            C: 0.5
+            max_iter: 82
+            C: 0.4
           random_forest:
             random_state: 42
-            n_estimators: 9
-            max_depth: 11
-            min_samples_split: 4
-            min_samples_leaf: 10
+            n_estimators: 7
+            max_depth: 8
+            min_samples_split: 6
+            min_samples_leaf: 17
     outs:
     - path: models/best_model.pkl
       hash: md5
-      md5: c136227081ad44aef7dbbe6e311c9081
-      size: 3207
+      md5: 025ed15fed0ca339d071422139f2ab91
+      size: 3216
   evaluate_1:
     cmd: python src\training\evaluate.py titanic
     deps:
     - path: data/processed/train-test.parquet
       hash: md5
-      md5: eab5fe4a13efefc1e6194575d54b9465
-      size: 12815
+      md5: 1df9b3e552c2613e5f18f807ccc3e14d
+      size: 9149
     - path: models/best_model.pkl
       hash: md5
-      md5: c136227081ad44aef7dbbe6e311c9081
-      size: 3207
+      md5: 025ed15fed0ca339d071422139f2ab91
+      size: 3216
     params:
       params.yaml:
         titanic.output.metrics_path: reports/metrics.json
@@ -164,7 +134,7 @@ stages:
     outs:
     - path: reports/metrics.json
       hash: md5
-      md5: 014ce78ba2a092f377ca283b03de8d73
+      md5: 439d7fabfeb2c88a974d2cdf93664050
       size: 113
   process_data_2:
     cmd: python src\training\process_data.py titanic2
@@ -203,19 +173,19 @@ stages:
       params.yaml:
         titanic2.model:
           logistic:
-            max_iter: 500
+            max_iter: 410
             C: 0.5
           random_forest:
-            random_state: 12
+            random_state: 5
             n_estimators: 10
-            max_depth: 10
-            min_samples_split: 4
-            min_samples_leaf: 5
+            max_depth: 9
+            min_samples_split: 9
+            min_samples_leaf: 7
     outs:
     - path: models/best_model2.pkl
       hash: md5
-      md5: 445451057ae06bd63e0d2043d9b6cb66
-      size: 3208
+      md5: 3263962bb4666e0a78a29a452e0b9eee
+      size: 48559
   evaluate_2:
     cmd: python src\training\evaluate.py titanic2
     deps:
@@ -225,8 +195,8 @@ stages:
       size: 8224
     - path: models/best_model2.pkl
       hash: md5
-      md5: 445451057ae06bd63e0d2043d9b6cb66
-      size: 3208
+      md5: 3263962bb4666e0a78a29a452e0b9eee
+      size: 48559
     params:
       params.yaml:
         titanic2.output.metrics_path: reports/metrics2.json
@@ -234,5 +204,75 @@ stages:
     outs:
     - path: reports/metrics2.json
       hash: md5
-      md5: f18547a3f9a0ed588e3147d6fd0ae15a
+      md5: e8ffcc1c21daa234ed64a2cf8b465fb7
+      size: 113
+  process_data_3:
+    cmd: python src\training\process_data.py titanic3
+    deps:
+    - path: data/raw/train.csv
+      hash: md5
+      md5: 2309cc5f04782ed9bb6016d9f4e381cf
+      size: 61194
+    params:
+      params.yaml:
+        titanic3.data:
+          raw_path: data/raw
+          processed_path: data/processed
+          file_name: train
+          target_column: Survived
+        titanic3.split:
+          test_size: 0.8
+          random_state: 10
+    outs:
+    - path: data/processed/train-test-3.parquet
+      hash: md5
+      md5: d8c97026fbee0bfbe9baf9e815ada5dc
+      size: 13692
+    - path: data/processed/train-train-3.parquet
+      hash: md5
+      md5: 2226b519ff6d47ca39224bbc300e66b8
+      size: 8172
+  train_3:
+    cmd: python src\training\train.py titanic3
+    deps:
+    - path: data/processed/train-train-3.parquet
+      hash: md5
+      md5: 2226b519ff6d47ca39224bbc300e66b8
+      size: 8172
+    params:
+      params.yaml:
+        titanic3.model:
+          logistic:
+            max_iter: 409
+            C: 0.5
+          random_forest:
+            random_state: 5
+            n_estimators: 17
+            max_depth: 9
+            min_samples_split: 9
+            min_samples_leaf: 10
+    outs:
+    - path: models/best_model3.pkl
+      hash: md5
+      md5: 9435aff6d31202481fe384e353e3f8b1
+      size: 61004
+  evaluate_3:
+    cmd: python src\training\evaluate.py titanic3
+    deps:
+    - path: data/processed/train-test-3.parquet
+      hash: md5
+      md5: d8c97026fbee0bfbe9baf9e815ada5dc
+      size: 13692
+    - path: models/best_model3.pkl
+      hash: md5
+      md5: 9435aff6d31202481fe384e353e3f8b1
+      size: 61004
+    params:
+      params.yaml:
+        titanic3.output.metrics_path: reports/metrics3.json
+        titanic3.output.model_path: models/best_model3.pkl
+    outs:
+    - path: reports/metrics3.json
+      hash: md5
+      md5: 7e7e57af7ddfe42293a56fd57f5679b9
       size: 113

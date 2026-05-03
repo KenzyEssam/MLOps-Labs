@@ -6,7 +6,13 @@ import pickle
 import logging
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score
+import re
+import pandas as pd
+import mlflow.sklearn
+import mlflow
 
+from dotenv import load_dotenv
+import dagshub
 
 # =========================
 # EVALUATION FUNCTION
@@ -46,13 +52,12 @@ if __name__ == "__main__":
     # -------------------------
     # LOAD EXPERIMENT NAME
     # -------------------------
-    experiment = sys.argv[1]  # titanic or titanic2
 
     # -------------------------
     # LOAD CONFIG (params.yaml)
     # -------------------------
     with open("params.yaml", "r") as f:
-        cfg = yaml.safe_load(f)[experiment]
+        cfg = yaml.safe_load(f)
 
     model_path = cfg["output"]["model_path"]
     metrics_path = cfg["output"]["metrics_path"]
@@ -62,13 +67,11 @@ if __name__ == "__main__":
     # -------------------------
     # LOAD TEST DATA
     # -------------------------
-    test_path = "data/processed/train-test.parquet"
+    
 
-    # handle second experiment naming automatically
-    if experiment == "titanic2":
-        test_path = "data/processed/train-test-2.parquet"
+    test_path = cfg["data"]["test_path"]
+        
 
-    import pandas as pd
 
     test_data = pd.read_parquet(test_path)
 
@@ -78,9 +81,22 @@ if __name__ == "__main__":
     # -------------------------
     # LOAD MODEL
     # -------------------------
-    with open(model_path, "rb") as f:
-        model = pickle.load(f)
+    
+    load_dotenv()
 
+    dagshub.init(
+        repo_owner=cfg["experiment"]["DAGSHUB_USERNAME"],
+        repo_name=cfg["experiment"]["DAGSHUB_REPO"],
+        mlflow=True
+    )
+
+    mlflow.set_experiment(cfg["experiment"]["name"])
+    
+    
+    model = mlflow.sklearn.load_model(
+        "models:/my-titanic-model/Staging"
+    )
+    
     # -------------------------
     # RUN EVALUATION
     # -------------------------

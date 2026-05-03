@@ -1,10 +1,10 @@
-import os
 import sys
-import yaml
 import pickle
 import logging
 
 import pandas as pd
+
+from mlflow import MlflowClient
 
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import cross_val_score
@@ -16,30 +16,26 @@ from pathlib import Path
 import yaml
 from sklearn.model_selection import cross_validate
 
-import mlflow
 import mlflow.sklearn
 from sklearn.metrics import precision_score, recall_score
+import os
+import dagshub
+import mlflow
+from dotenv import load_dotenv
 
+    
 # =========================
 # LOAD CONFIG
 # =========================
 
 def load_config():
-    experiment = sys.argv[1]  # titanic or titanic2
-
     base_dir = Path(__file__).resolve().parents[2]
     params_path = base_dir / "params.yaml"
-
-    if not params_path.exists():
-        raise FileNotFoundError(f"params.yaml not found at {params_path}")
 
     with open(params_path, "r") as f:
         cfg = yaml.safe_load(f)
 
-    if experiment not in cfg:
-        raise KeyError(f"Experiment '{experiment}' not found in params.yaml")
-
-    return cfg[experiment]
+    return cfg
 
 
 # =========================
@@ -117,20 +113,15 @@ def train_models(X, y, logger, cfg):
     
     mlflow.log_param("best_model", best_model_name) ##Log Best Model
     mlflow.log_metric("best_accuracy", best_score) ##Log Best Accuracy
-    mlflow.sklearn.log_model(best_model, "model") ##Log Best model
-    # =========================
-    # SAVE MODEL
-    # =========================
-    model_path = cfg["output"]["model_path"]
     
-
-    os.makedirs(os.path.dirname(model_path), exist_ok=True)
-
-    logger.info(f"Saving model → {model_path}")
-
-    with open(model_path, "wb") as f:
-        pickle.dump(best_model, f)
-
+        
+    model_info = mlflow.sklearn.log_model(
+    sk_model=best_model,
+    artifact_path="model",
+    registered_model_name="my-titanic-model")
+    
+    
+  
     logger.info(f"Best model selected: {best_model_name}")
     logger.info(f"Best accuracy score: {best_score}")
 
@@ -162,25 +153,43 @@ def load_data(cfg):
 # MAIN FUNCTION
 # =========================
 def main():
+    
     cfg = load_config()
 
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
-
-    MLFLOW_DIR = Path(__file__).resolve().parents[2] / "mlruns"
-    mlflow.set_tracking_uri(f"file:{MLFLOW_DIR}")    
     
+    load_dotenv()
+    dagshub.init(
+        repo_owner=cfg["experiment"]["DAGSHUB_USERNAME"],
+        repo_name=cfg["experiment"]["DAGSHUB_REPO"],
+        mlflow=True
+    )
+    
+    # Set experiment (Dagshub handles tracking backend automatically)
+    mlflow.set_experiment(cfg["experiment"]["name"])
     print("MLflow tracking URI:", mlflow.get_tracking_uri())
     
-    mlflow.set_experiment("titanic-experiments")  # ✅ MUST be here
-
+    
+    
     X, y = load_data(cfg)
+    
 
-    experiment_name = sys.argv[1]
-
-    with mlflow.start_run(run_name=experiment_name):
-        mlflow.log_param("experiment", experiment_name)
+    with mlflow.start_run():
         train_models(X, y, logger, cfg)
+
+        client = MlflowClient()
+
+        latest_version = client.get_latest_versions(
+            name="my-titanic-model",
+            stages=["None"]
+        )[0].version
+
+        client.transition_model_version_stage(
+            name="my-titanic-model",
+            version=latest_version,
+            stage="Staging"
+        )
 
 
 # =========================

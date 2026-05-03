@@ -1,67 +1,32 @@
 stages:
 
-  process_data_1:
-    cmd: python src\training\process_data.py titanic
+  process_data:
+    cmd: python src\training\process_data.py
     deps:
       - data/raw/train.csv
     params:
-      - titanic.data
-      - titanic.split
+      - data
+      - split
     outs:
       - data/processed/train-train.parquet
       - data/processed/train-test.parquet
 
 
-  train_1:
-    cmd: python src\training\train.py titanic
+  train:
+    cmd: python src\training\train.py 
     deps:
       - data/processed/train-test.parquet
     params:
-      - titanic.model
-    outs:
-      - models/best_model.pkl
+      - model
+      - experiment
 
 
-  evaluate_1:
-    cmd: python src\training\evaluate.py titanic
+  evaluate:
+    cmd: python src\training\evaluate.py
     deps:
-      - models/best_model.pkl
       - data/processed/train-test.parquet
     params:
-      - titanic.output.model_path
-      - titanic.output.metrics_path
+      - output.model_path
+      - output.metrics_path
     outs:
       - reports/metrics.json
-
-  process_data_2:
-    cmd: python src\training\process_data.py titanic2
-    deps:
-      - data/raw/train.csv
-    params:
-      - titanic2.data
-      - titanic2.split
-    outs:
-      - data/processed/train-train-2.parquet
-      - data/processed/train-test-2.parquet
-
-
-  train_2:
-    cmd: python src\training\train.py titanic2
-    deps:
-      - data/processed/train-train-2.parquet
-    params:
-      - titanic2.model
-    outs:
-      - models/best_model2.pkl
-
-
-  evaluate_2:
-    cmd: python src\training\evaluate.py titanic2
-    deps:
-      - models/best_model2.pkl
-      - data/processed/train-test-2.parquet
-    params:
-      - titanic2.output.model_path
-      - titanic2.output.metrics_path
-    outs:
-      - reports/metrics2.json

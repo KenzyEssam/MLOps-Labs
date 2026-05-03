@@ -9,7 +9,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 from sklearn.impute import SimpleImputer
-
+import re
 
 # =========================
 # Logger setup
@@ -49,7 +49,7 @@ def build_preprocessor():
 # =========================
 # Data processing function
 # =========================
-def process_data(cfg, config_name):
+def process_data(cfg):
 
     logger.info("Starting process_data stage")
 
@@ -88,16 +88,15 @@ def process_data(cfg, config_name):
     # =========================
     # FIX: handle multiple experiments cleanly
     # =========================
-    suffix = "" if config_name == "titanic" else "-2"
-
+    
     train_path = os.path.join(
         processed_dir,
-        f"train-train{suffix}.parquet"
+        "train-train.parquet"
     )
 
     test_path = os.path.join(
         processed_dir,
-        f"train-test{suffix}.parquet"
+        "train-test.parquet"
     )
 
     train_df.to_parquet(train_path)
@@ -113,22 +112,10 @@ def process_data(cfg, config_name):
 # ENTRY POINT
 # =========================
 if __name__ == "__main__":
-
-    if len(sys.argv) < 2:
-        logger.error("Missing config name (e.g., titanic or titanic2)")
-        sys.exit(1)
-
-    config_name = sys.argv[1]
-
-    logger.info(f"Using config: {config_name}")
+    
+    logger.info("Loading params.yaml")
 
     with open("params.yaml") as f:
-        params = yaml.safe_load(f)
+        cfg = yaml.safe_load(f)
 
-    if config_name not in params:
-        logger.error(f"Config '{config_name}' not found in params.yaml")
-        sys.exit(1)
-
-    cfg = params[config_name]
-
-    process_data(cfg, config_name)
+    process_data(cfg)
