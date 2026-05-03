@@ -1,0 +1,14 @@
+artifact_uri: file:///C:/Users/kenzo/ITI 9 MONTHS/MLOps/MLOps-Labs/mlruns/689201136122943751/92f6356a57a14a2da471027449253e44/artifacts
+end_time: 1777834546100
+entry_point_name: ''
+experiment_id: '689201136122943751'
+lifecycle_stage: active
+run_id: 92f6356a57a14a2da471027449253e44
+run_name: titanic2
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1777834541902
+status: 3
+tags: []
+user_id: kenzo

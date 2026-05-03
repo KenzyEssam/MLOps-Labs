@@ -14,8 +14,11 @@ from sklearn.ensemble import RandomForestClassifier
 from process_data import build_preprocessor
 from pathlib import Path
 import yaml
+from sklearn.model_selection import cross_validate
 
-
+import mlflow
+import mlflow.sklearn
+from sklearn.metrics import precision_score, recall_score
 
 # =========================
 # LOAD CONFIG
@@ -63,24 +66,47 @@ def train_models(X, y, logger, cfg):
     best_model_name = None
 
     for name, model in models.items():
+        
+        mlflow.log_params({f"{name}_param_{k}": v for k, v in model.get_params().items()})
 
         pipeline = Pipeline([
             ("preprocessor", preprocessor),
             ("model", model)
         ])
 
-        score = cross_val_score(
+        scoring = {
+            "accuracy": "accuracy",
+            "precision": "precision",
+            "recall": "recall",
+            "f1": "f1"
+        }
+
+        scores = cross_validate(
             pipeline,
             X,
             y,
             cv=5,
-            scoring="accuracy"
-        ).mean()
+            scoring=scoring
+        )
+        
+        accuracy = scores["test_accuracy"].mean()
+        precision = scores["test_precision"].mean()
+        recall = scores["test_recall"].mean()
+        f1 = scores["test_f1"].mean()
+        
+        logger.info(f"{name} accuracy: {accuracy}")
+        logger.info(f"{name} precision: {precision}")
+        logger.info(f"{name} recall: {recall}")
+        logger.info(f"{name} f1: {f1}")
+        
+        ##Log Metrics
+        mlflow.log_metric(f"{name}_cv_accuracy", accuracy)
+        mlflow.log_metric(f"{name}_cv_precision", precision)
+        mlflow.log_metric(f"{name}_cv_recall", recall)
+        mlflow.log_metric(f"{name}_cv_f1", f1)
 
-        logger.info(f"{name} accuracy: {score}")
-
-        if score > best_score:
-            best_score = score
+        if accuracy > best_score:
+            best_score = accuracy
             best_model = pipeline
             best_model_name = name
 
@@ -88,11 +114,15 @@ def train_models(X, y, logger, cfg):
     # FIT BEST MODEL
     # =========================
     best_model.fit(X, y)
-
+    
+    mlflow.log_param("best_model", best_model_name) ##Log Best Model
+    mlflow.log_metric("best_accuracy", best_score) ##Log Best Accuracy
+    mlflow.sklearn.log_model(best_model, "model") ##Log Best model
     # =========================
     # SAVE MODEL
     # =========================
     model_path = cfg["output"]["model_path"]
+    
 
     os.makedirs(os.path.dirname(model_path), exist_ok=True)
 
@@ -132,19 +162,25 @@ def load_data(cfg):
 # MAIN FUNCTION
 # =========================
 def main():
-
     cfg = load_config()
 
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
 
-    logger.info("Loading data...")
+    MLFLOW_DIR = Path(__file__).resolve().parents[2] / "mlruns"
+    mlflow.set_tracking_uri(f"file:{MLFLOW_DIR}")    
+    
+    print("MLflow tracking URI:", mlflow.get_tracking_uri())
+    
+    mlflow.set_experiment("titanic-experiments")  # ✅ MUST be here
 
     X, y = load_data(cfg)
 
-    logger.info(f"Data shape: {X.shape}")
+    experiment_name = sys.argv[1]
 
-    train_models(X, y, logger, cfg)
+    with mlflow.start_run(run_name=experiment_name):
+        mlflow.log_param("experiment", experiment_name)
+        train_models(X, y, logger, cfg)
 
 
 # =========================

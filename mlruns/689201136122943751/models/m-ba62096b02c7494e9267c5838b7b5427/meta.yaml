@@ -1,0 +1,10 @@
+artifact_location: file:///C:/Users/kenzo/ITI 9 MONTHS/MLOps/MLOps-Labs/mlruns/689201136122943751/models/m-ba62096b02c7494e9267c5838b7b5427/artifacts
+creation_timestamp: 1777834902095
+experiment_id: '689201136122943751'
+last_updated_timestamp: 1777834905852
+model_id: m-ba62096b02c7494e9267c5838b7b5427
+model_type: null
+name: model
+source_run_id: 872e7d4d90a54a73b9e5a215c5d734e5
+status: 2
+status_message: null

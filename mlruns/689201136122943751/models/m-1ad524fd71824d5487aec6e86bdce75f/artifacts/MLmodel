@@ -1,0 +1,23 @@
+artifact_path: file:///C:/Users/kenzo/ITI 9 MONTHS/MLOps/MLOps-Labs/mlruns/689201136122943751/models/m-1ad524fd71824d5487aec6e86bdce75f/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.11.0
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.8.0
+    skops_trusted_types: null
+mlflow_version: 3.11.1
+model_id: m-1ad524fd71824d5487aec6e86bdce75f
+model_size_bytes: 23304
+model_uuid: m-1ad524fd71824d5487aec6e86bdce75f
+prompts: null
+run_id: 37abe71d4ca54678aae83d811df09ea6
+utc_time_created: '2026-05-03 18:39:18.524692'
