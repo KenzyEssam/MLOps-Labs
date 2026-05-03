@@ -12,10 +12,14 @@ titanic:
   model:
     logistic:
       max_iter: 84
+      C: 0.5
 
     random_forest:
       random_state: 42
       n_estimators: 7
+      max_depth: 10
+      min_samples_split: 4
+      min_samples_leaf: 2
 
   output:
     model_path: models/best_model.pkl
@@ -36,10 +40,14 @@ titanic2:
   model:
     logistic:
       max_iter: 500
+      C: 0.5
 
     random_forest:
       random_state: 10
       n_estimators: 200
+      max_depth: 10
+      min_samples_split: 4
+      min_samples_leaf: 2
 
   output:
     model_path: models/best_model2.pkl

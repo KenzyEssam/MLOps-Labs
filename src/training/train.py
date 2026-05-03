@@ -50,12 +50,11 @@ def train_models(X, y, logger, cfg):
 
     models = {
         "logreg": LogisticRegression(
-            max_iter=cfg["model"]["logistic"]["max_iter"]
+            **cfg["model"]["logistic"]
         ),
 
         "rf": RandomForestClassifier(
-            random_state=cfg["model"]["random_forest"]["random_state"],
-            n_estimators=cfg["model"]["random_forest"]["n_estimators"]
+            **cfg["model"]["random_forest"]
         )
     }
 
