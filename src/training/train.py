@@ -5,7 +5,7 @@ import logging
 import pandas as pd
 
 from mlflow import MlflowClient
-
+from mlflow.models import infer_signature
 from sklearn.pipeline import Pipeline
 from sklearn.model_selection import cross_val_score
 from sklearn.linear_model import LogisticRegression
@@ -113,12 +113,21 @@ def train_models(X, y, logger, cfg):
     
     mlflow.log_param("best_model", best_model_name) ##Log Best Model
     mlflow.log_metric("best_accuracy", best_score) ##Log Best Accuracy
-    
         
+            
+    # create predictions for signature
+    train_preds = best_model.predict(X)
+
+    # infer signature
+    signature = infer_signature(X, train_preds)
+
+    # log model WITH signature
     model_info = mlflow.sklearn.log_model(
-    sk_model=best_model,
-    artifact_path="model",
-    registered_model_name="my-titanic-model")
+        sk_model=best_model,
+        artifact_path="model",
+        registered_model_name="my-titanic-model",
+        signature=signature
+    )
     
     
   

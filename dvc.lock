@@ -16,24 +16,24 @@ stages:
           target_column: Survived
           test_path: data/processed/train-test.parquet
         split:
-          test_size: 0.3
+          test_size: 0.45
           random_state: 12
     outs:
     - path: data/processed/train-test.parquet
       hash: md5
-      md5: c607e7aaf1f52560243547803a42af3c
-      size: 9206
+      md5: 748edb04a8197f5388ffbc2a4189f61b
+      size: 10595
     - path: data/processed/train-train.parquet
       hash: md5
-      md5: 5cef8bcf6c09f26cf89a2d4afd7b1e97
-      size: 12800
+      md5: ad72cf8da5f2f5cfd823e5dd964e9ec1
+      size: 11508
   train:
     cmd: python src\training\train.py
     deps:
     - path: data/processed/train-train.parquet
       hash: md5
-      md5: 5cef8bcf6c09f26cf89a2d4afd7b1e97
-      size: 12800
+      md5: ad72cf8da5f2f5cfd823e5dd964e9ec1
+      size: 11508
     params:
       params.yaml:
         experiment:
@@ -42,21 +42,21 @@ stages:
           DAGSHUB_REPO: MLOps-Labs
         model:
           logistic:
-            max_iter: 50
-            C: 0.4
+            max_iter: 41
+            C: 0.1
           random_forest:
             random_state: 40
-            n_estimators: 9
+            n_estimators: 7
             max_depth: 12
-            min_samples_split: 3
+            min_samples_split: 5
             min_samples_leaf: 10
   evaluate:
     cmd: python src\training\evaluate.py
     deps:
     - path: data/processed/train-test.parquet
       hash: md5
-      md5: c607e7aaf1f52560243547803a42af3c
-      size: 9206
+      md5: 748edb04a8197f5388ffbc2a4189f61b
+      size: 10595
     params:
       params.yaml:
         experiment:
@@ -65,13 +65,13 @@ stages:
           DAGSHUB_REPO: MLOps-Labs
         model:
           logistic:
-            max_iter: 50
-            C: 0.4
+            max_iter: 41
+            C: 0.1
           random_forest:
             random_state: 40
-            n_estimators: 9
+            n_estimators: 7
             max_depth: 12
-            min_samples_split: 3
+            min_samples_split: 5
             min_samples_leaf: 10
   process_data_1:
     cmd: python src\training\process_data.py titanic

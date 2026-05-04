@@ -6,19 +6,19 @@
     test_path: data/processed/train-test.parquet
 
   split:
-    test_size: 0.3
+    test_size: 0.45
     random_state: 12
 
   model:
     logistic:
-      max_iter: 50
-      C: 0.4
+      max_iter: 41
+      C: 0.1
 
     random_forest:
       random_state: 40
-      n_estimators: 9
+      n_estimators: 7
       max_depth: 12
-      min_samples_split: 3
+      min_samples_split: 5
       min_samples_leaf: 10
 
   experiment:
