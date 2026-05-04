@@ -30,6 +30,29 @@ stages:
   train:
     cmd: python src\training\train.py
     deps:
+    - path: data/processed/train-train.parquet
+      hash: md5
+      md5: 5cef8bcf6c09f26cf89a2d4afd7b1e97
+      size: 12800
+    params:
+      params.yaml:
+        experiment:
+          name: my-titanic-experiments
+          DAGSHUB_USERNAME: kenzy.3ab7alim
+          DAGSHUB_REPO: MLOps-Labs
+        model:
+          logistic:
+            max_iter: 50
+            C: 0.4
+          random_forest:
+            random_state: 40
+            n_estimators: 9
+            max_depth: 12
+            min_samples_split: 3
+            min_samples_leaf: 10
+  evaluate:
+    cmd: python src\training\evaluate.py
+    deps:
     - path: data/processed/train-test.parquet
       hash: md5
       md5: c607e7aaf1f52560243547803a42af3c
@@ -42,30 +65,14 @@ stages:
           DAGSHUB_REPO: MLOps-Labs
         model:
           logistic:
-            max_iter: 54
+            max_iter: 50
             C: 0.4
           random_forest:
-            random_state: 42
-            n_estimators: 14
-            max_depth: 8
-            min_samples_split: 6
-            min_samples_leaf: 8
-  evaluate:
-    cmd: python src\training\evaluate.py
-    deps:
-    - path: data/processed/train-test.parquet
-      hash: md5
-      md5: c607e7aaf1f52560243547803a42af3c
-      size: 9206
-    params:
-      params.yaml:
-        output.metrics_path: reports/metrics.json
-        output.model_path: models/best_model.pkl
-    outs:
-    - path: reports/metrics.json
-      hash: md5
-      md5: a4f58e121e5e6492903df2c4314e25c1
-      size: 113
+            random_state: 40
+            n_estimators: 9
+            max_depth: 12
+            min_samples_split: 3
+            min_samples_leaf: 10
   process_data_1:
     cmd: python src\training\process_data.py titanic
     deps:

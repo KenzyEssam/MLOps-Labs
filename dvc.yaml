@@ -15,7 +15,7 @@ stages:
   train:
     cmd: python src\training\train.py 
     deps:
-      - data/processed/train-test.parquet
+      - data/processed/train-train.parquet
     params:
       - model
       - experiment
@@ -26,7 +26,5 @@ stages:
     deps:
       - data/processed/train-test.parquet
     params:
-      - output.model_path
-      - output.metrics_path
-    outs:
-      - reports/metrics.json
+      - model
+      - experiment
