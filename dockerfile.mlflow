@@ -1,0 +1,33 @@
+FROM python:3.11-slim
+
+# =========================
+# ENV VARIABLES
+# =========================
+ENV MLFLOW_TRACKING_URI="https://dagshub.com/kenzy.3ab7alim/MLOps-Labs.mlflow"
+ENV MODEL_NAME="my-titanic-model"
+ENV PORT=5000
+
+WORKDIR /app
+
+# =========================
+# INSTALL DEPENDENCIES
+# =========================
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir -r requirements.txt
+
+# =========================
+# COPY PROJECT (optional)
+# =========================
+COPY . .
+
+# =========================
+# SERVE MODEL
+# =========================
+CMD mlflow models serve \
+  --model-uri "models:/${MODEL_NAME}/Production" \
+  --env-manager local \
+  --host 0.0.0.0 \
+  --port ${PORT}
+
+EXPOSE 5000
