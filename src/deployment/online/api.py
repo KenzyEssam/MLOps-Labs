@@ -19,21 +19,25 @@ class InferenceAPI(ls.LitAPI):
 
     def decode_request(self, request):
         try:
-            InferenceRequest(**request["input"])
-
             data = request["input"]
 
-            x = pd.DataFrame([{
-                "Pclass": data["Pclass"],
-                "Sex": data["Sex"],
-                "Age": data["Age"],
-                "SibSp": data["SibSp"],
-                "Parch": data["Parch"],
-                "Fare": data["Fare"],
-                "Embarked": data["Embarked"]
-            }])
+            # SINGLE RECORD
+            if isinstance(data, dict):
+                InferenceRequest(**data)
 
-            return x
+                x = pd.DataFrame([data])
+                return x
+
+            # BATCH REQUEST
+            elif isinstance(data, list):
+                for item in data:
+                    InferenceRequest(**item)
+
+                x = pd.DataFrame(data)
+                return x
+
+            else:
+                raise ValueError("Invalid input format")
 
         except Exception as e:
             print("Decode error:", e)
