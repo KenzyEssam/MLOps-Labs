@@ -19,12 +19,17 @@ stages:
     params:
       - model
       - experiment
+    outs:
+      - models/best_model.pkl
 
 
   evaluate:
     cmd: python src\training\evaluate.py
     deps:
       - data/processed/train-test.parquet
+      - models/best_model.pkl
     params:
       - model
       - experiment
+    outs:
+      - reports/metrics.json

@@ -129,7 +129,20 @@ def train_models(X, y, logger, cfg):
         signature=signature
     )
     
+    # SAVE MODEL
+    # =========================
+    model_path = cfg["output"]["model_path"]
+
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
+
+    logger.info(f"Saving model → {model_path}")
+
+    with open(model_path, "wb") as f:
+        pickle.dump(best_model, f)
+    # =========================
     
+        
+        
   
     logger.info(f"Best model selected: {best_model_name}")
     logger.info(f"Best accuracy score: {best_score}")

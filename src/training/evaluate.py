@@ -27,6 +27,15 @@ def evaluate(X_test, y_test, model, logger):
         "precision": precision_score(y_test, preds),
         "recall": recall_score(y_test, preds)
     }
+    
+    
+    
+    metrics_path = cfg["output"]["metrics_path"]
+    os.makedirs(os.path.dirname(metrics_path), exist_ok=True)
+    with open(metrics_path, "w") as f:
+        json.dump(report, f, indent=4)
+        
+        
 
     logger.info(f"Evaluation results: {report}")
 

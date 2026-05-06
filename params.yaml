@@ -11,18 +11,22 @@
 
   model:
     logistic:
-      max_iter: 41
-      C: 0.1
+      max_iter: 48
+      C: 0.2
 
     random_forest:
       random_state: 40
-      n_estimators: 7
+      n_estimators: 19
       max_depth: 12
-      min_samples_split: 5
-      min_samples_leaf: 10
+      min_samples_split: 12
+      min_samples_leaf: 11
 
   experiment:
     name: my-titanic-experiments
     DAGSHUB_USERNAME: kenzy.3ab7alim
     DAGSHUB_REPO: MLOps-Labs
+
+  output:
+    model_path: models/best_model.pkl
+    metrics_path: reports/metrics.json
 
